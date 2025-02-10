@@ -36,9 +36,9 @@ export class AccountController {
   };
   @Post('reset')
   @HttpCode(HttpStatus.OK)
-  reset() {
+  reset(@Res() res: Response) {
     Object.keys(this.accounts).forEach((key) => delete this.accounts[key]);
-    return 'OK';
+    return res.status(HttpStatus.OK).send('OK');
   }
 
   @Get('balance')
