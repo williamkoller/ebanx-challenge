@@ -1,6 +1,6 @@
 [![Deployment to Railway](https://github.com/williamkoller/challenge-ebanx/actions/workflows/deployment.yml/badge.svg)](https://github.com/williamkoller/challenge-ebanx/actions/workflows/deployment.yml)
 
-<p align="right">
+<p align="center">
   <a href="https://railway.app">
     <img src="https://railway.app/button.svg" alt="Deploy with Railway">
   </a>
