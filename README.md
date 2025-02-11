@@ -1,12 +1,13 @@
 [![Deployment to Railway](https://github.com/williamkoller/challenge-ebanx/actions/workflows/deployment.yml/badge.svg)](https://github.com/williamkoller/challenge-ebanx/actions/workflows/deployment.yml)
 
-<p align="center">
+<p align="right">
   <a href="https://railway.app">
     <img src="https://railway.app/button.svg" alt="Deploy with Railway">
   </a>
+  <a href="https://www.ebanx.com/en/">
+    <img src="/images/log-ebanx.png" alt="Ebanx" title="Ebanx" height="80" width="200" align="right"/>
+  </a>
 </p>
-
-<img src="/images/log-ebanx.png" alt="Ebanx" title="Ebanx" height="80" width="200" align="right"/>
 
 ## Ebanx Challenge
 
