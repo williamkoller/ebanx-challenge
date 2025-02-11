@@ -162,6 +162,6 @@ Ouput:
 
 [Convertional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
-#### we use Git commit msg linter in the project
+#### We use Git commit msg linter in the project
 
 <img src="/images/git-commit-msg-linter.png" alt="Git commit Msg Linter" title="Git commit Msg Linter" align="center"/>
