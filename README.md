@@ -24,4 +24,4 @@
 
 - App running
 
-<img src="/images/terminal.png" alt="Ebanx" title="Ebanx" height="80" width="200" align="right"/>
+<img src="/images/terminal.png" alt="Terminal" title="Terminal" align="center"/>
