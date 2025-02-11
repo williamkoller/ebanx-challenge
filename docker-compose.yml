@@ -3,9 +3,9 @@ services:
   api-ebanx:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: api-ebanx
-    entrypoint: sh -c 'npm i && npm run start:prod'
+    entrypoint: sh -c 'npm i && npm run start:dev'
     env_file:
       - .env
     volumes:
