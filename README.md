@@ -157,3 +157,7 @@ Ouput:
 2. Coverage tests `npm run test:cov`
 
 <img src="/images/tests.png" alt="Tests" title="Tests" align="center"/>
+
+#### Git Commit Msg Linter
+
+<img src="/images/git-commit-msg-linter.png" alt="Git commit Msg Linter" title="Git commit Msg Linter" align="center"/>
