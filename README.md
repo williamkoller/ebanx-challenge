@@ -158,6 +158,10 @@ Ouput:
 
 <img src="/images/tests.png" alt="Tests" title="Tests" align="center"/>
 
-#### Git Commit Msg Linter
+### Semantic commits
+
+[Convertional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+
+#### Git commit msg linter
 
 <img src="/images/git-commit-msg-linter.png" alt="Git commit Msg Linter" title="Git commit Msg Linter" align="center"/>
