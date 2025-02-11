@@ -15,6 +15,8 @@
 
 - The API consists of two endpoints, `GET /balance`, and `POST /event`. Using your favorite programming language, build a system that can handle these requests.
 
+### [Architecture](./architecture.md)
+
 ### Requirements
 
 - `docker`, `docker-compose`, `nodejs` and `nestjs`
