@@ -28,8 +28,6 @@
 
 ### Requests
 
-#### Reset Accounts | `POST /reset`
-
 - Reset state before starting tests
 
 ```bash
