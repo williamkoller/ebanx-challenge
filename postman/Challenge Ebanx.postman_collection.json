@@ -1,0 +1,76 @@
+{
+	"info": {
+		"_postman_id": "e319f270-1dbb-440a-8857-b27c616a3942",
+		"name": "Challenge Ebanx",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10262380"
+	},
+	"item": [
+		{
+			"name": "/reset",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/reset",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"reset"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/balance",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/balance?account_id=100",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"balance"
+					],
+					"query": [
+						{
+							"key": "account_id",
+							"value": "100"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/event",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\n{\"type\":\"transfer\", \"origin\":\"200\", \"amount\":15, \"destination\":\"300\"}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/event",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"event"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
