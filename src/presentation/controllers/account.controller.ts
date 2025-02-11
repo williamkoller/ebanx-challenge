@@ -13,15 +13,15 @@ import {
 import { Response } from 'express';
 import { Account } from '../../domain/entities/account';
 import { TransactionStrategy } from '../../application/strategies/transaction-strategy.interface';
-import { DepositStrategy } from '../../application/strategies/deposit-strategy';
-import { WithdrawStrategy } from '../../application/strategies/withdraw.strategy';
-import { TransferStrategy } from '../../application/strategies/transfer-startegy';
 import { AccountDto } from '../dtos/account.dto';
 import {
   DepositDto,
   TransferDto,
   WithdrawDto,
 } from '../../application/mappers/transaction-mapper';
+import { DepositStrategy } from '../../application/strategies/deposit/deposit-strategy'
+import { WithdrawStrategy } from '../../application/strategies/withdraw/withdraw.strategy'
+import { TransferStrategy } from '../../application/strategies/transfer/transfer-startegy'
 
 @Controller()
 export class AccountController {
