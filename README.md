@@ -25,3 +25,130 @@
 - Application running:
 
 <img src="/images/terminal.png" alt="Terminal" title="Terminal" align="center"/>
+
+### Requests
+
+#### Reset Accounts | `POST /reset`
+
+- Reset state before starting tests
+
+```bash
+curl --location --request POST 'localhost:3001/reset' \
+--header 'Content-Type: application/json'
+```
+
+Output:
+
+```bash
+OK%
+```
+
+#### Get balance for non-existing account
+
+```bash
+curl --location --request GET 'localhost:3001/balance?account_id=1234' \
+--header 'Content-Type: application/json'
+```
+
+Output:
+
+```bash
+0%
+```
+
+#### Create account with initial balance
+
+```bash
+curl --location --request POST 'localhost:3001/event' \
+--header 'Content-Type: application/json' \
+--data-raw '{"type":"deposit", "destination":"100", "amount":10}'
+```
+
+Output:
+
+```bash
+{"destination":{"id":"100","balance":10}}%
+```
+
+#### Deposit into existing account
+
+```bash
+curl --location --request POST 'localhost:3001/event' \
+--header 'Content-Type: application/json' \
+--data-raw '{"type":"deposit", "destination":"100", "amount":10}'
+```
+
+Output:
+
+```bash
+{"destination":{"id":"100","balance":20}}%
+```
+
+#### Get balance for existing account
+
+```bash
+curl --location --request GET 'localhost:3001/balance?account_id=100' \
+--header 'Content-Type: application/json'
+```
+
+Output:
+
+```bash
+20%
+```
+
+#### Withdraw from non-existing account
+
+```bash
+curl --location --request POST 'localhost:3001/event' \
+--header 'Content-Type: application/json' \
+--data-raw '{"type":"withdraw", "origin":"200", "amount":10}'
+```
+
+Ouput:
+
+```bash
+0%
+```
+
+#### Withdraw from existing account
+
+```bash
+curl --location --request POST 'localhost:3001/event' \
+--header 'Content-Type: application/json' \
+--data-raw '{"type":"withdraw", "origin":"100", "amount":5}'
+```
+
+Ouput:
+
+```bash
+{"origin":{"id":"100","balance":15}}%
+```
+
+#### Transfer from existing account
+
+```bash
+curl --location --request POST 'localhost:3001/event' \
+--header 'Content-Type: application/json' \
+--data-raw '{"type":"transfer", "origin":"100", "amount":15, "destination":"300"}'
+```
+
+Ouput:
+
+```bash
+{"origin":{"id":"100","balance":0},"destination":{"id":"300","balance":15}}%
+```
+
+#### Transfer from non-existing account
+
+```bash
+curl --location --request POST 'localhost:3001/event' \
+--header 'Content-Type: application/json' \
+--data-raw '{"type":"transfer", "origin":"200", "amount":15, "destination":"300"}'
+```
+
+Ouput:
+
+```bash
+0%
+```
