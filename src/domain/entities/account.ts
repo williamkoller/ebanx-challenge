@@ -1,4 +1,4 @@
-import { DomainValidationException } from '../../shared/errors/domain-validation-exception';
+import { DomainValidationException } from '../errors/domain-validation-exception';
 
 export type AccountProps = {
   id: string;
