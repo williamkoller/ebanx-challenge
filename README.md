@@ -150,3 +150,10 @@ Ouput:
 ```bash
 0%
 ```
+
+### How runnig tests
+
+1. `npm run test`
+2. Coverage tests `npm run test:cov`
+
+<img src="/images/tests.png" alt="Tests" title="Tests" align="center"/>
