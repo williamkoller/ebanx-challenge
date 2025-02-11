@@ -2,11 +2,11 @@
 
 <img src="/images/log-ebanx.png" alt="Ebanx" title="Ebanx" height="80" width="200" align="right"/>
 
-## Challenge Ebanx
+## Ebanx Challenge
 
-### Proposal
+### Objective
 
-- The API consists of two endpoints, `GET /balance`, and `POST /event`. Using your favorite programming language, build a system that can handle those requests.
+- The API consists of two endpoints, `GET /balance`, and `POST /event`. Using your favorite programming language, build a system that can handle these requests.
 
 ### Requirements
 
@@ -14,14 +14,14 @@
 
 ### Installation
 
-1. use `nvm use` to set the `nodejs` version in this project, see the file `.nvmrc`
-2. install `npm ci`
-3. `cp .env.example .env`
+1. Use `nvm use` to set the `nodejs` version specified in the project. See the file `.nvmrc`.
+2. Install dependencies with `npm ci`.
+3. Copy environment variables: `cp .env.example .env`.
 
-### How running?!
+### How to Run
 
-- `npm run docker:start --build`
+- Start the application with Docker: `npm run docker:start --build`.
 
-- App running
+- Application running:
 
 <img src="/images/terminal.png" alt="Terminal" title="Terminal" align="center"/>
