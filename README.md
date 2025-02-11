@@ -16,7 +16,7 @@
 
 1. use `nvm use` to set the `nodejs` version in this project, see the file `.nvmrc`
 2. install `npm ci`
-   3 . `cp .env.example .env`
+3. `cp .env.example .env`
 
 ### How running?!
 
