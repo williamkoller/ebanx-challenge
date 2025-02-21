@@ -43,7 +43,7 @@ export class Account {
 
   withdraw(amount: number) {
     if (this.balance < amount) {
-      throw new DomainValidationException('');
+      throw new DomainValidationException('Insufficient balance');
     }
     this.balance -= amount;
     this.transactions.push({ type: 'withdraw', origin: this.id, amount });
@@ -51,10 +51,19 @@ export class Account {
 
   transfer(amount: number, destination: Account) {
     if (this.balance < amount) {
-      throw new DomainValidationException();
+      throw new DomainValidationException('Insufficient balance');
     }
+
     this.balance -= amount;
-    destination.deposit(amount);
+    this.transactions.push({ type: 'withdraw', origin: this.id, amount });
+
+    destination.balance += amount;
+    destination.transactions.push({
+      type: 'deposit',
+      destination: destination.id,
+      amount,
+    });
+
     this.transactions.push({
       type: 'transfer',
       origin: this.id,

@@ -5,12 +5,15 @@ import {
   TransferDto,
 } from '../../mappers/transaction-mapper';
 import { Account, Transaction } from '../../../domain/entities/account';
+import * as AsyncLock from 'async-lock';
+
+const lock = new AsyncLock();
 
 export class TransferStrategy implements TransactionStrategy<TransferDto> {
-  execute(
+  async execute(
     accounts: Record<string, Account>,
     transaction: Transaction,
-  ): TransferDto | number {
+  ): Promise<TransferDto | number> {
     const { destination, amount, origin } = transaction;
 
     if (!destination) {
@@ -27,20 +30,24 @@ export class TransferStrategy implements TransactionStrategy<TransferDto> {
       );
     }
 
-    if (!accounts[destination]) {
-      accounts[destination] = Account.create({
-        id: destination,
-        balance: 0,
-        transactions: [transaction],
-      });
-    }
-    if (!accounts[origin]) {
-      return 0;
-    }
-    accounts[origin].transfer(amount, accounts[destination]);
-    return TransactionMapper.mapTransfer(
-      accounts[origin],
-      accounts[destination],
-    );
+    return await lock.acquire(destination, async () => {
+      if (!accounts[destination]) {
+        accounts[destination] = Account.create({
+          id: destination,
+          balance: 0,
+          transactions: [transaction],
+        });
+      }
+      if (!accounts[origin]) {
+        return 0;
+      }
+      await Promise.resolve(
+        accounts[origin].transfer(amount, accounts[destination]),
+      );
+      return TransactionMapper.mapTransfer(
+        accounts[origin],
+        accounts[destination],
+      );
+    });
   }
 }

@@ -5,9 +5,12 @@ import {
   TransactionMapper,
 } from '../../mappers/transaction-mapper';
 import { Account, Transaction } from '../../../domain/entities/account';
+import * as AsyncLock from 'async-lock';
+
+const lock = new AsyncLock();
 
 export class DepositStrategy implements TransactionStrategy<DepositDto> {
-  execute(accounts: Record<string, Account>, transaction: Transaction) {
+  async execute(accounts: Record<string, Account>, transaction: Transaction) {
     const { destination, amount } = transaction;
 
     if (!destination) {
@@ -17,15 +20,17 @@ export class DepositStrategy implements TransactionStrategy<DepositDto> {
       );
     }
 
-    if (!accounts[destination]) {
-      accounts[destination] = Account.create({
-        id: destination,
-        balance: 0,
-        transactions: [transaction],
-      });
-    }
+    return await lock.acquire(destination, async () => {
+      if (!accounts[destination]) {
+        accounts[destination] = Account.create({
+          id: destination,
+          balance: 0,
+          transactions: [transaction],
+        });
+      }
 
-    accounts[destination].deposit(amount);
-    return TransactionMapper.mapDeposit(accounts[destination]);
+      await Promise.resolve(accounts[destination].deposit(amount));
+      return TransactionMapper.mapDeposit(accounts[destination]);
+    });
   }
 }

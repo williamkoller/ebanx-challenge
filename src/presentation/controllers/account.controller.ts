@@ -19,9 +19,9 @@ import {
   TransferDto,
   WithdrawDto,
 } from '../../application/mappers/transaction-mapper';
-import { DepositStrategy } from '../../application/strategies/deposit/deposit-strategy'
-import { WithdrawStrategy } from '../../application/strategies/withdraw/withdraw.strategy'
-import { TransferStrategy } from '../../application/strategies/transfer/transfer-startegy'
+import { DepositStrategy } from '../../application/strategies/deposit/deposit-strategy';
+import { WithdrawStrategy } from '../../application/strategies/withdraw/withdraw.strategy';
+import { TransferStrategy } from '../../application/strategies/transfer/transfer-startegy';
 
 @Controller()
 export class AccountController {
@@ -53,14 +53,14 @@ export class AccountController {
 
   @Post('event')
   @HttpCode(HttpStatus.CREATED)
-  event(@Body() body: AccountDto, @Res() res: Response) {
+  async event(@Body() body: AccountDto, @Res() res: Response) {
     const { type } = body;
 
     const strategy = this.transactionStrategies[type];
     if (!strategy) {
       throw new HttpException('Invalid event type', HttpStatus.BAD_REQUEST);
     }
-    const result = strategy.execute(this.accounts, body);
+    const result = await strategy.execute(this.accounts, body);
 
     if (result === 0) {
       return res.status(HttpStatus.NOT_FOUND).send(0);

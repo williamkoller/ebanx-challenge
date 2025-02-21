@@ -4,5 +4,5 @@ export interface TransactionStrategy<T> {
   execute(
     accounts: Record<string, Account>,
     transaction: Transaction,
-  ): T | number;
+  ): Promise<T | number>;
 }

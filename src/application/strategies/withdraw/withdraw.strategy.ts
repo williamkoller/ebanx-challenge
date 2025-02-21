@@ -1,13 +1,18 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { TransactionMapper, WithdrawDto } from '../../mappers/transaction-mapper'
-import { TransactionStrategy } from '../transaction-strategy.interface'
-import { Account, Transaction } from '../../../domain/entities/account'
+import {
+  TransactionMapper,
+  WithdrawDto,
+} from '../../mappers/transaction-mapper';
+import { TransactionStrategy } from '../transaction-strategy.interface';
+import { Account, Transaction } from '../../../domain/entities/account';
+import * as AsyncLock from 'async-lock';
 
+const lock = new AsyncLock();
 export class WithdrawStrategy implements TransactionStrategy<WithdrawDto> {
-  execute(
+  async execute(
     accounts: Record<string, Account>,
     transaction: Transaction,
-  ): WithdrawDto | number {
+  ): Promise<WithdrawDto | number> {
     const { amount, origin } = transaction;
 
     if (!origin) {
@@ -17,10 +22,12 @@ export class WithdrawStrategy implements TransactionStrategy<WithdrawDto> {
       );
     }
 
-    if (!accounts[origin]) {
-      return 0;
-    }
-    accounts[origin].withdraw(amount);
-    return TransactionMapper.mapWithdraw(accounts[origin]);
+    return await lock.acquire(origin, async () => {
+      if (!accounts[origin]) {
+        return 0;
+      }
+      await Promise.resolve(accounts[origin].withdraw(amount));
+      return TransactionMapper.mapWithdraw(accounts[origin]);
+    });
   }
 }
