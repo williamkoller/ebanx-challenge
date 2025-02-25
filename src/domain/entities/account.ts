@@ -4,6 +4,7 @@ export type AccountProps = {
   id: string;
   balance: number;
   transactions: Array<Transaction>;
+  isProcessed?: boolean;
 };
 
 export type Transaction = {
@@ -34,6 +35,14 @@ export class Account {
 
   set transactions(value: Transaction) {
     this.props.transactions.push(value);
+  }
+
+  get isProcessed() {
+    return this.props.isProcessed || false;
+  }
+
+  set isProcessed(value: boolean) {
+    this.props.isProcessed = value;
   }
 
   deposit(amount: number) {

@@ -5,23 +5,17 @@ import {
   TransferDto,
 } from '../../mappers/transaction-mapper';
 import { Account, Transaction } from '../../../domain/entities/account';
-import * as AsyncLock from 'async-lock';
-
-const lock = new AsyncLock();
+import { AccountRepository } from '../../../infra/db/repositories/account-repository.interface';
+import { ClientSession } from 'mongoose';
 
 export class TransferStrategy implements TransactionStrategy<TransferDto> {
+  constructor(private readonly accountRepository: AccountRepository) {}
+
   async execute(
-    accounts: Record<string, Account>,
     transaction: Transaction,
+    session: ClientSession,
   ): Promise<TransferDto | number> {
     const { destination, amount, origin } = transaction;
-
-    if (!destination) {
-      throw new HttpException(
-        'Destination account is required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
     if (!origin) {
       throw new HttpException(
@@ -29,25 +23,41 @@ export class TransferStrategy implements TransactionStrategy<TransferDto> {
         HttpStatus.BAD_REQUEST,
       );
     }
+    if (!destination) {
+      throw new HttpException(
+        'Destination account is required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-    return await lock.acquire(destination, async () => {
-      if (!accounts[destination]) {
-        accounts[destination] = Account.create({
-          id: destination,
-          balance: 0,
-          transactions: [transaction],
-        });
-      }
-      if (!accounts[origin]) {
+    return await session.withTransaction(async () => {
+      const originAccount = await this.accountRepository.findById(
+        origin,
+        session,
+      );
+      if (!originAccount) {
         return 0;
       }
-      await Promise.resolve(
-        accounts[origin].transfer(amount, accounts[destination]),
+
+      let destinationAccount = await this.accountRepository.findById(
+        destination,
+        session,
       );
-      return TransactionMapper.mapTransfer(
-        accounts[origin],
-        accounts[destination],
-      );
+      if (!destinationAccount) {
+        destinationAccount = Account.create({
+          id: destination,
+          balance: 0,
+          transactions: [],
+        });
+        await this.accountRepository.create(destinationAccount, session);
+      }
+
+      originAccount.transfer(amount, destinationAccount);
+
+      await this.accountRepository.update(originAccount, session);
+      await this.accountRepository.update(destinationAccount, session);
+
+      return TransactionMapper.mapTransfer(originAccount, destinationAccount);
     });
   }
 }

@@ -1,8 +1,9 @@
+import { ClientSession } from 'mongoose'
 import { Account, Transaction } from '../../domain/entities/account';
 
 export interface TransactionStrategy<T> {
   execute(
-    accounts: Record<string, Account>,
     transaction: Transaction,
+    session: ClientSession,
   ): Promise<T | number>;
 }

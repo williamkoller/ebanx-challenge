@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: api-ebanx
-    entrypoint: sh -c 'npm i && npm run start:dev'
+    entrypoint: sh -c 'until nc -z -v -w30 mongo 27017; do echo "Waiting for mongo..."; sleep 5; done; npm i && npm run start:dev'
     env_file:
       - .env
     volumes:
@@ -15,6 +15,41 @@ services:
       - ${PORT}:${PORT}
     networks:
       - api-ebanx-network
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=rootpassword
+    command: --replSet rs0 --noauth
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - api-ebanx-network
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - '8081:8081'
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=rootpassword
+      - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017/ebanx-challenge
+    networks:
+      - api-ebanx-network
+    depends_on:
+      - mongo
+    entrypoint: sh -c 'until nc -z -v -w30 mongo 27017; do echo "Waiting for mongo..."; sleep 5; done; mongo-express'
+
 networks:
   api-ebanx-network:
     driver: bridge
+
+volumes:
+  mongo_data:

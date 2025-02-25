@@ -5,12 +5,16 @@ import {
   TransactionMapper,
 } from '../../mappers/transaction-mapper';
 import { Account, Transaction } from '../../../domain/entities/account';
-import * as AsyncLock from 'async-lock';
-
-const lock = new AsyncLock();
+import { AccountRepository } from '../../../infra/db/repositories/account-repository.interface';
+import { ClientSession } from 'mongoose';
 
 export class DepositStrategy implements TransactionStrategy<DepositDto> {
-  async execute(accounts: Record<string, Account>, transaction: Transaction) {
+  constructor(private readonly accountRepository: AccountRepository) {}
+
+  async execute(
+    transaction: Transaction,
+    session: ClientSession,
+  ) {
     const { destination, amount } = transaction;
 
     if (!destination) {
@@ -20,17 +24,24 @@ export class DepositStrategy implements TransactionStrategy<DepositDto> {
       );
     }
 
-    return await lock.acquire(destination, async () => {
-      if (!accounts[destination]) {
-        accounts[destination] = Account.create({
+    return await session.withTransaction(async () => {
+      let account = await this.accountRepository.findById(destination, session);
+
+      if (!account) {
+        account = Account.create({
           id: destination,
           balance: 0,
-          transactions: [transaction],
+          transactions: [],
         });
+
+        await this.accountRepository.create(account, session);
       }
 
-      await Promise.resolve(accounts[destination].deposit(amount));
-      return TransactionMapper.mapDeposit(accounts[destination]);
+      account.deposit(amount);
+
+      await this.accountRepository.update(account, session);
+
+      return TransactionMapper.mapDeposit(account);
     });
   }
 }

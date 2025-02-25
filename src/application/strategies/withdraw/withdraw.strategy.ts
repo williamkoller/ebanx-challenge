@@ -4,14 +4,16 @@ import {
   WithdrawDto,
 } from '../../mappers/transaction-mapper';
 import { TransactionStrategy } from '../transaction-strategy.interface';
-import { Account, Transaction } from '../../../domain/entities/account';
-import * as AsyncLock from 'async-lock';
+import { Transaction } from '../../../domain/entities/account';
+import { ClientSession } from 'mongoose';
+import { AccountRepository } from '../../../infra/db/repositories/account-repository.interface'
 
-const lock = new AsyncLock();
 export class WithdrawStrategy implements TransactionStrategy<WithdrawDto> {
+  constructor(private readonly accountRepository: AccountRepository) {}
+
   async execute(
-    accounts: Record<string, Account>,
     transaction: Transaction,
+    session: ClientSession,
   ): Promise<WithdrawDto | number> {
     const { amount, origin } = transaction;
 
@@ -22,12 +24,20 @@ export class WithdrawStrategy implements TransactionStrategy<WithdrawDto> {
       );
     }
 
-    return await lock.acquire(origin, async () => {
-      if (!accounts[origin]) {
+    return await session.withTransaction(async () => {
+      const originAccount = await this.accountRepository.findById(
+        origin,
+        session,
+      );
+      if (!originAccount) {
         return 0;
       }
-      await Promise.resolve(accounts[origin].withdraw(amount));
-      return TransactionMapper.mapWithdraw(accounts[origin]);
+
+      originAccount.withdraw(amount);
+
+      await this.accountRepository.update(originAccount, session);
+
+      return TransactionMapper.mapWithdraw(originAccount);
     });
   }
 }

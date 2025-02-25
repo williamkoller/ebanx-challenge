@@ -22,50 +22,64 @@ import {
 import { DepositStrategy } from '../../application/strategies/deposit/deposit-strategy';
 import { WithdrawStrategy } from '../../application/strategies/withdraw/withdraw.strategy';
 import { TransferStrategy } from '../../application/strategies/transfer/transfer-startegy';
+import { InjectConnection } from '@nestjs/mongoose';
+import { AccountUseCase } from '../../application/usecases/account/account-usecase';
+import { Connection } from 'mongoose';
 
 @Controller()
 export class AccountController {
-  accounts: Record<string, Account> = {};
-  transactionStrategies: Record<
-    string,
-    TransactionStrategy<DepositDto | WithdrawDto | TransferDto | number>
-  > = {
-    deposit: new DepositStrategy(),
-    withdraw: new WithdrawStrategy(),
-    transfer: new TransferStrategy(),
-  };
+  constructor(
+    private readonly accountUseCase: AccountUseCase,
+    @InjectConnection() private readonly connection: Connection,
+  ) {}
+
   @Post('reset')
   @HttpCode(HttpStatus.OK)
-  reset(@Res() res: Response) {
-    Object.keys(this.accounts).forEach((key) => delete this.accounts[key]);
+  async reset(@Res() res: Response) {
+    await this.accountUseCase.resetAccounts();
     return res.status(HttpStatus.OK).send('OK');
   }
 
   @Get('balance')
   @HttpCode(HttpStatus.OK)
-  getBalance(@Query('account_id') accountId: string, @Res() res: Response) {
-    const account = this.accounts[accountId];
-    if (!account) {
+  async getBalance(
+    @Query('account_id') accountId: string,
+    @Res() res: Response,
+  ) {
+    const session = await this.connection.startSession();
+    session.startTransaction();
+    try {
+      const balance = await this.accountUseCase.getBalance(accountId, session);
+      return res.status(HttpStatus.OK).json(balance);
+    } catch {
       return res.status(HttpStatus.NOT_FOUND).send(0);
     }
-    return res.status(HttpStatus.OK).json(account.balance);
   }
 
   @Post('event')
   @HttpCode(HttpStatus.CREATED)
   async event(@Body() body: AccountDto, @Res() res: Response) {
-    const { type } = body;
+    const session = await this.connection.startSession();
+    session.startTransaction();
+    try {
+      const result = await this.accountUseCase.handleEvent(
+        body.type,
+        body,
+        session,
+      );
 
-    const strategy = this.transactionStrategies[type];
-    if (!strategy) {
-      throw new HttpException('Invalid event type', HttpStatus.BAD_REQUEST);
+      if (result === 0) {
+        await session.abortTransaction();
+        return res.status(HttpStatus.NOT_FOUND).send(0);
+      }
+
+      await session.commitTransaction();
+      return res.status(HttpStatus.CREATED).send(result);
+    } catch (error) {
+      await session.abortTransaction();
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    } finally {
+      session.endSession();
     }
-    const result = await strategy.execute(this.accounts, body);
-
-    if (result === 0) {
-      return res.status(HttpStatus.NOT_FOUND).send(0);
-    }
-
-    return res.status(HttpStatus.CREATED).send(result);
   }
 }
